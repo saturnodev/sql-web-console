@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  # Base de datos MySQL
+  mysql:
+    image: mysql:8.0
+    container_name: sql-console-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: sql_console
+      MYSQL_USER: sqluser
+      MYSQL_PASSWORD: sqlpass
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "3306:3306"
+    networks:
+      - sql-console-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # Aplicación PHP
+  app:
+    build: .
+    container_name: sql-console-app
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      # Configuración de base de datos
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: sqluser
+      DB_PASSWORD: sqlpass
+      DB_NAME: sql_console
+      
+      # Configuración de seguridad (se generan automáticamente si no se especifican)
+      APP_SECRET_KEY: ${APP_SECRET_KEY:-}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-}
+      TOKEN_EXPIRY_HOURS: ${TOKEN_EXPIRY_HOURS:-24}
+    volumes:
+      - app_data:/var/www/html/data
+    ports:
+      - "8080:80"
+    networks:
+      - sql-console-network
+
+  # phpMyAdmin (opcional)
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: sql-console-phpmyadmin
+    restart: unless-stopped
+    depends_on:
+      - mysql
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: password
+    ports:
+      - "8081:80"
+    networks:
+      - sql-console-network
+
+volumes:
+  mysql_data:
+    driver: local
+  app_data:
+    driver: local
+
+networks:
+  sql-console-network:
+    driver: bridge 

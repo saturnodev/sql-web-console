@@ -1,0 +1,96 @@
+version: '3.8'
+
+services:
+  # Base de datos MySQL para producción
+  mysql:
+    image: mysql:8.0
+    container_name: sql-console-mysql-prod
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-sql_console}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - mysql_data_prod:/var/lib/mysql
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - sql-console-network-prod
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    # Configuración de seguridad para producción
+    command: --default-authentication-plugin=mysql_native_password --sql-mode=STRICT_TRANS_TABLES,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO
+
+  # Aplicación PHP para producción
+  app:
+    build: .
+    container_name: sql-console-app-prod
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      # Configuración de base de datos
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      DB_NAME: ${MYSQL_DATABASE:-sql_console}
+      
+      # Configuración de seguridad (requeridas en producción)
+      APP_SECRET_KEY: ${APP_SECRET_KEY}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      TOKEN_EXPIRY_HOURS: ${TOKEN_EXPIRY_HOURS:-24}
+      APP_ENV: production
+    volumes:
+      - app_data_prod:/var/www/html/data
+    ports:
+      - "${APP_PORT:-80}:80"
+    networks:
+      - sql-console-network-prod
+    # Configuración de recursos
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+
+  # Nginx reverse proxy para producción (opcional)
+  nginx:
+    image: nginx:alpine
+    container_name: sql-console-nginx-prod
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "${NGINX_PORT:-80}:80"
+      - "${NGINX_SSL_PORT:-443}:443"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/nginx/ssl:/etc/nginx/ssl:ro
+      - nginx_logs:/var/log/nginx
+    networks:
+      - sql-console-network-prod
+    # Configuración de recursos
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.25'
+
+volumes:
+  mysql_data_prod:
+    driver: local
+  app_data_prod:
+    driver: local
+  nginx_logs:
+    driver: local
+
+networks:
+  sql-console-network-prod:
+    driver: bridge 

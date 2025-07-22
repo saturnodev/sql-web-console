@@ -118,5 +118,20 @@ class AuthModel {
         session_start();
         return $_SESSION['username'] ?? null;
     }
+
+    public function getAllTokens() {
+        $tokens = $this->loadTokens();
+        $result = [];
+        
+        foreach ($tokens as $username => $tokenData) {
+            $result[] = [
+                'username' => $username,
+                'created' => $tokenData['created'],
+                'expires' => $tokenData['expires']
+            ];
+        }
+        
+        return $result;
+    }
 }
 ?> 

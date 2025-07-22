@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  # Configuración para desarrollo
+  app:
+    volumes:
+      - .:/var/www/html
+      - app_data:/var/www/html/data
+    environment:
+      - APP_ENV=development
+    ports:
+      - "8080:80"
+    # Habilitar logs detallados
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Configuración para desarrollo de MySQL
+  mysql:
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: sql_console
+      MYSQL_USER: sqluser
+      MYSQL_PASSWORD: sqlpass
+    # Habilitar logs detallados
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # phpMyAdmin para desarrollo
+  phpmyadmin:
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: password 

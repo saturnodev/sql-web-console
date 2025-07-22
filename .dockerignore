@@ -1,0 +1,63 @@
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Archivos de desarrollo
+.git
+.gitignore
+README.md
+.env
+.env.example
+.env.local
+.env.production
+
+# Archivos de Docker
+Dockerfile
+docker-compose.yml
+docker-compose.override.yml
+.dockerignore
+
+# Archivos de IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Archivos de logs
+*.log
+logs/
+
+# Archivos temporales
+tmp/
+temp/
+cache/
+
+# Archivos de backup
+*.bak
+*.backup
+
+# Archivos de configuración local
+config.php
+data/
+
+# Archivos de instalación
+install.php
+
+# Archivos de documentación
+docs/
+*.md
+
+# Archivos de testing
+tests/
+phpunit.xml
+.phpunit.result.cache
+
+# Archivos de composer (se instalarán en el contenedor)
+vendor/
+composer.lock
+
+# Archivos de node (si existieran)
+node_modules/
+package-lock.json
+yarn.lock 

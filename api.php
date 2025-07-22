@@ -8,11 +8,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
 }
 
-require_once 'config.php';
-require_once 'src/Database.php';
-require_once 'src/Auth.php';
+// Autoloader
+spl_autoload_register(function ($class) {
+    $file = str_replace('\\', '/', $class) . '.php';
+    if (file_exists($file)) {
+        require_once $file;
+    }
+});
 
-$auth = new Auth($config);
+// Cargar configuración
+require_once 'config.php';
+
+// Instanciar controladores
+$authController = new App\Controllers\AuthController();
+$databaseController = new App\Controllers\DatabaseController();
+
 $response = ['success' => false, 'message' => 'Acción no válida'];
 
 try {
@@ -20,108 +30,46 @@ try {
     
     switch ($action) {
         case 'login':
-            $username = $_POST['username'] ?? '';
-            $token = $_POST['token'] ?? '';
-            
-            if (empty($username) || empty($token)) {
-                $response = ['success' => false, 'message' => 'Usuario y token son requeridos'];
-                break;
-            }
-            
-            $authResult = $auth->authenticate($username, $token);
-            if ($authResult['success']) {
-                $auth->createSession($username, $authResult['expires']);
-                $response = [
-                    'success' => true,
-                    'message' => 'Autenticación exitosa',
-                    'username' => $username
-                ];
-            } else {
-                $response = $authResult;
-            }
+            $response = $authController->login();
             break;
             
         case 'logout':
-            $auth->destroySession();
-            $response = ['success' => true, 'message' => 'Sesión cerrada'];
+            $response = $authController->logout();
+            break;
+            
+        case 'check_auth':
+            $response = [
+                'success' => $authController->isAuthenticated(),
+                'username' => $authController->getCurrentUser()
+            ];
             break;
             
         case 'create_token':
-            if (!$auth->validateSession()) {
-                $response = ['success' => false, 'message' => 'No autorizado'];
-                break;
-            }
+            $response = $authController->createToken();
+            break;
             
-            $username = $_POST['username'] ?? '';
-            if (empty($username)) {
-                $response = ['success' => false, 'message' => 'Usuario requerido'];
-                break;
-            }
+        case 'get_tokens':
+            $response = $authController->getTokens();
+            break;
             
-            $token = $auth->createToken($username);
-            $response = [
-                'success' => true,
-                'message' => 'Token creado exitosamente',
-                'token' => $token
-            ];
+        case 'revoke_token':
+            $response = $authController->revokeToken();
             break;
             
         case 'execute_query':
-            if (!$auth->validateSession()) {
-                $response = ['success' => false, 'message' => 'No autorizado'];
-                break;
-            }
-            
-            $sql = $_POST['sql'] ?? '';
-            if (empty($sql)) {
-                $response = ['success' => false, 'message' => 'Consulta SQL requerida'];
-                break;
-            }
-            
-            $db = new Database($config);
-            $result = $db->query($sql);
-            
-            $response = [
-                'success' => true,
-                'data' => $result,
-                'message' => 'Consulta ejecutada correctamente'
-            ];
+            $response = $databaseController->executeQuery();
             break;
             
         case 'get_tables':
-            if (!$auth->validateSession()) {
-                $response = ['success' => false, 'message' => 'No autorizado'];
-                break;
-            }
-            
-            $db = new Database($config);
-            $tables = $db->getTables();
-            
-            $response = [
-                'success' => true,
-                'tables' => $tables
-            ];
+            $response = $databaseController->getTables();
             break;
             
         case 'get_table_structure':
-            if (!$auth->validateSession()) {
-                $response = ['success' => false, 'message' => 'No autorizado'];
-                break;
-            }
+            $response = $databaseController->getTableStructure();
+            break;
             
-            $tableName = $_POST['table'] ?? '';
-            if (empty($tableName)) {
-                $response = ['success' => false, 'message' => 'Nombre de tabla requerido'];
-                break;
-            }
-            
-            $db = new Database($config);
-            $structure = $db->getTableStructure($tableName);
-            
-            $response = [
-                'success' => true,
-                'structure' => $structure['data']
-            ];
+        case 'test_connection':
+            $response = $databaseController->testConnection();
             break;
             
         default:
