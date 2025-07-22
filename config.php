@@ -32,19 +32,18 @@ $config = [
     'TOKEN_EXPIRY_HOURS' => TOKEN_EXPIRY_HOURS
 ];
 
-// Configurar las clases de configuración
-App\Config\App::setConfig([
-    'APP_SECRET_KEY' => APP_SECRET_KEY,
-    'APP_ENV' => APP_ENV,
-    'JWT_SECRET_KEY' => JWT_SECRET_KEY,
-    'TOKEN_EXPIRY_HOURS' => TOKEN_EXPIRY_HOURS
-]);
+// Configurar las clases de configuración (se hará después del autoloader)
+// App\Config\App::setConfig([
+//     'APP_SECRET_KEY' => APP_SECRET_KEY,
+//     'APP_ENV' => APP_ENV,
+//     'JWT_SECRET_KEY' => JWT_SECRET_KEY,
+//     'TOKEN_EXPIRY_HOURS' => TOKEN_EXPIRY_HOURS
+// ]);
 
-App\Config\Database::setConfig([
-    'DB_HOST' => DB_HOST,
-    'DB_PORT' => DB_PORT,
-    'DB_USER' => DB_USER,
-    'DB_PASSWORD' => DB_PASSWORD,
-    'DB_NAME' => DB_NAME
-]);
-?> 
+// App\Config\Database::setConfig([
+//     'DB_HOST' => DB_HOST,
+//     'DB_PORT' => DB_PORT,
+//     'DB_USER' => DB_USER,
+//     'DB_PASSWORD' => DB_PASSWORD,
+//     'DB_NAME' => DB_NAME
+// ]); 

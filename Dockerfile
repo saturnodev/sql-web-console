@@ -17,14 +17,19 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
 # Habilitar mod_rewrite para Apache
 RUN a2enmod rewrite
 
+# Configurar PHP para Apache
+RUN echo "AddType application/x-httpd-php .php" >> /etc/apache2/apache2.conf
+RUN echo "DirectoryIndex index.php index.html" >> /etc/apache2/apache2.conf
+
 # Configurar Apache
 RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
 # Crear directorio de la aplicación
 WORKDIR /var/www/html
 
-# Copiar archivos de la aplicación
+# Copiar archivos de la aplicación (excluyendo .git)
 COPY . /var/www/html/
+RUN rm -rf /var/www/html/.git
 
 # Crear directorio data y configurar permisos
 RUN mkdir -p /var/www/html/data \

@@ -19,30 +19,4 @@
             </form>
         </div>
     </div>
-</div>
-
-<script>
-$(document).ready(function() {
-    $('#loginForm').submit(function(e) {
-        e.preventDefault();
-        login();
-    });
-});
-
-function login() {
-    const username = $('#username').val();
-    const token = $('#token').val();
-    
-    $.post('api.php', {
-        action: 'login',
-        username: username,
-        token: token
-    }, function(response) {
-        if (response.success) {
-            window.location.href = 'index.php?action=console';
-        } else {
-            showAlert('danger', response.message);
-        }
-    });
-}
-</script> 
+</div> 

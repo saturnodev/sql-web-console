@@ -136,22 +136,20 @@ restore:
 # Variables de entorno
 env-example:
 	@echo "📝 Creando archivo .env de ejemplo..."
-	@cat > .env.example << EOF
-# Configuración de MySQL
-MYSQL_ROOT_PASSWORD=tu_password_seguro
-MYSQL_USER=sqluser
-MYSQL_PASSWORD=sqlpass
-MYSQL_DATABASE=sql_console
-
-# Configuración de seguridad
-APP_SECRET_KEY=tu_app_secret_key_aqui
-JWT_SECRET_KEY=tu_jwt_secret_key_aqui
-TOKEN_EXPIRY_HOURS=24
-
-# Configuración de puertos
-APP_PORT=80
-NGINX_PORT=80
-NGINX_SSL_PORT=443
-EOF
+	@echo "# Configuración de MySQL" > .env.example
+	@echo "MYSQL_ROOT_PASSWORD=tu_password_seguro" >> .env.example
+	@echo "MYSQL_USER=sqluser" >> .env.example
+	@echo "MYSQL_PASSWORD=sqlpass" >> .env.example
+	@echo "MYSQL_DATABASE=sql_console" >> .env.example
+	@echo "" >> .env.example
+	@echo "# Configuración de seguridad" >> .env.example
+	@echo "APP_SECRET_KEY=tu_app_secret_key_aqui" >> .env.example
+	@echo "JWT_SECRET_KEY=tu_jwt_secret_key_aqui" >> .env.example
+	@echo "TOKEN_EXPIRY_HOURS=24" >> .env.example
+	@echo "" >> .env.example
+	@echo "# Configuración de puertos" >> .env.example
+	@echo "APP_PORT=80" >> .env.example
+	@echo "NGINX_PORT=80" >> .env.example
+	@echo "NGINX_SSL_PORT=443" >> .env.example
 	@echo "✅ Archivo .env.example creado"
 	@echo "📝 Copia .env.example a .env y edita las variables" 

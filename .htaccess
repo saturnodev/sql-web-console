@@ -19,14 +19,13 @@ RewriteEngine On
 </FilesMatch>
 
 # Proteger directorio data
-<Directory "data">
+<FilesMatch "^data/">
     Order Allow,Deny
     Deny from all
-</Directory>
+</FilesMatch>
 
 # Configuraciones de seguridad
-ServerSignature Off
-Options -Indexes
+# ServerSignature y Options se configuran en el servidor principal
 
 # Headers de seguridad
 <IfModule mod_headers.c>
